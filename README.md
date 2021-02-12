@@ -14,7 +14,7 @@ Just add the following to your README (replacing USER and REPO):
 
 It looks like this (for `node-yahoo-finance2`):
 
-![contributor-faces](https://contributors-svg.vercel.app/api/svg?user=USER&repo=REPO)
+![contributor-faces](https://contributors-svg.vercel.app/api/svg?user=gadicc&repo=node-yahoo-finance2)
 
 Thanks to [Vercel](http://vercel.com/) for the free hosting.  Let's hope this
 doesn't get popular enough to exceed my free limits :)
