@@ -16,6 +16,15 @@ It looks like this (for `node-yahoo-finance2`):
 
 ![contributor-faces](https://contributors-svg.vercel.app/api/svg?user=gadicc&repo=node-yahoo-finance2)
 
+Unfortunately this embeds with SVG with an IMG tag, which breaks the individual
+links and tooltips.  If possible (i.e. not in GitHub), it's preferable to embed
+with an OBJECT tag:
+
+```html
+<object type="image/svg+xml"
+  data="https://contributors-svg.vercel.app/api/svg?user=USER&repo=REPO" />
+```
+
 Thanks to [Vercel](http://vercel.com/) for the free hosting.  Let's hope this
 doesn't get popular enough to exceed my free limits :)
 
