@@ -1,0 +1,10 @@
+{
+  "name": "contributors-svg",
+  "version": "0.0.1",
+  "main": "index.js",
+  "author": "Gadi Cohen <dragon@wastelands.net>",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^2.6.1"
+  }
+}
