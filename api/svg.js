@@ -1,11 +1,17 @@
 const fetch = require('node-fetch');
 
-const RADIUS = 32;
-const IMG_W = 64;
-const IMG_H = 64;
-const MARGIN_X = 10;
-const MARGIN_Y = 10;
+const TEST_MODE = !!process.env.TEST_MODE;
+
+// By default GitHub contrib graph gives avatars with s=60
+const RADIUS = 30;
+const IMG_W = RADIUS * 2;
+const IMG_H = RADIUS * 2;
+const MARGIN = 10;
+const MARGIN_X = MARGIN;
+const MARGIN_Y = MARGIN;
+
 const MAX_WIDTH = 890;
+
 const SKIP = [ "semantic-release-bot", "renovate-bot" ];
 
 async function dataUrl(url) {
@@ -22,19 +28,21 @@ module.exports = async (req, res) => {
   const repo = req.query.repo;
   const url = `https://github.com/${user}/${repo}/graphs/contributors-data`;
 
-  const dataRes = await fetch(url, {
-    "headers": {
-      "accept": "application/json",
-    },
-  });
+  let data;
+  if (TEST_MODE) {
+    data = require('../test.js');
+  } else {
+    const dataRes = await fetch(url, {
+      "headers": {
+        "accept": "application/json",
+      },
+    });
+    data = await dataRes.json();
+  }
   
-  const data = await dataRes.json();
-
-  let svg = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="890" height="143">\n'
-    + "  <style>\n"
-    + "  </style>\n";
-  
-  let line = 0;
+  let innerSvg = '';
+  let row = 0;
+  let totalRows = 1;
   let x = 0;
   let y = 0;
   data.sort((a,b) => b.total - a.total);
@@ -42,21 +50,36 @@ module.exports = async (req, res) => {
     const author = contrib.author;
     if (SKIP.includes(author.login))
       continue;
-      
-    //const avatarUrl = author.avatar.replace(/&/g,'&amp;');
-    const avatarUrl = await dataUrl(author.avatar);
     
-    svg += `  <a xlink:href="https://github.com/${author.login}" target="_blank" rel="nofollow sponsored" id="${author.login}">\n`
-      + `    <clipPath id="circ-${author.login}">\n`
-      + `      <circle r="32" cx="${x+RADIUS}" cy="${y+RADIUS}" />\n`
+    // https://avatars.githubusercontent.com/u/381978?s=60&amp;v=4
+    const avatarUrl = TEST_MODE
+      ? author.avatar.replace(/&/g,'&amp;')
+      : await dataUrl(author.avatar);
+    
+    innerSvg += `  <a xlink:href="https://github.com/${author.login}" target="_blank" rel="nofollow" id="${author.login}">\n`
+      + `    <clipPath id="cp-${author.login}">\n`
+      + `      <circle r="${RADIUS}" cx="${x+RADIUS}" cy="${y+RADIUS}" />\n`
       + `    </clipPath>\n`
-      + `    <image x="${x}" y="${y}" clip-path="url(#circ-${author.login})" width="${IMG_W}" height="${IMG_H}" xlink:href="${avatarUrl}" />  \n`
+      + `    <image x="${x}" y="${y}" clip-path="url(#cp-${author.login})" width="${IMG_W}" height="${IMG_H}" xlink:href="${avatarUrl}" />  \n`
       + `    <title>${author.login} (${contrib.total})</title>\n`
       + `  </a>\n`;
     x += IMG_W + MARGIN_X;
   }
   
-  svg += '</svg>\n';
+  
+  const width = x - MARGIN_X;
+  const height = totalRows * (IMG_H + MARGIN_Y) - MARGIN_Y;
+
+  let svg = '<svg\n'
+    + '  xmlns="http://www.w3.org/2000/svg"\n'
+    + '  xmlns:xlink="http://www.w3.org/1999/xlink"\n'
+    + `  width="${width}"\n`
+    + `  height="${height}"\n`
+    + '>\n'
+    + "  <style>\n"
+    + "  </style>\n";
+  
+  svg += innerSvg + '</svg>\n';
   
   res.setHeader('cache-control', 'public, max-age=60');
   res.setHeader('content-type', 'image/svg+xml; charset=utf-8');

@@ -1,5 +1,4 @@
-export default JSON.parse(`
-[
+module.exports = [
   {
     "total": 13,
     "author": {
@@ -180,5 +179,4 @@ export default JSON.parse(`
       }
     ]
   }
-]  
-`);
+];
