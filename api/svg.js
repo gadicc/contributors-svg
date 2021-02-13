@@ -26,6 +26,8 @@ async function dataUrl(url) {
 module.exports = async (req, res) => {
   const user = req.query.user;
   const repo = req.query.repo;
+  const dataUri = req.query.dataUri === "false" ? false : true;
+  
   const url = `https://github.com/${user}/${repo}/graphs/contributors-data`;
 
   let data;
@@ -52,7 +54,7 @@ module.exports = async (req, res) => {
       continue;
     
     // https://avatars.githubusercontent.com/u/381978?s=60&amp;v=4
-    const avatarUrl = TEST_MODE
+    const avatarUrl = (TEST_MODE || !dataUri)
       ? author.avatar.replace(/&/g,'&amp;')
       : await dataUrl(author.avatar);
     
