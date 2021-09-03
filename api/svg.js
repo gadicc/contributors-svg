@@ -30,7 +30,7 @@ async function dataUrl(url) {
 module.exports = async (req, res) => {
   const user = req.query.user;
   const repo = req.query.repo;
-  const url = `https://github.com/${user}/${repo}/graphs/contributors`;
+  const url = `https://github.com/${user}/${repo}/graphs/contributors-data`;
 
   let data;
   if (TEST_MODE) {
