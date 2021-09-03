@@ -30,6 +30,8 @@ async function dataUrl(url) {
 module.exports = async (req, res) => {
   const user = req.query.user;
   const repo = req.query.repo;
+  const dataUri = req.query.dataUri === "false" ? false : true;
+
   const url = `https://github.com/${user}/${repo}/graphs/contributors-data`;
 
   let data;
@@ -44,12 +46,14 @@ module.exports = async (req, res) => {
     data = await dataRes.json();
   }
 
+  let row = 0;
   let totalRows = 1;
+
   let x = 0;
   let y = 0;
 
   let innerSvg = "";
-
+  
   data.sort((a, b) => b.total - a.total);
 
   for (let contrib of data) {
@@ -57,9 +61,10 @@ module.exports = async (req, res) => {
     if (SKIP.includes(author.login)) continue;
 
     // https://avatars.githubusercontent.com/u/381978?s=60&amp;v=4
-    const avatarUrl = TEST_MODE
-      ? author.avatar.replace(/&/g, "&amp;")
-      : await dataUrl(author.avatar);
+    const avatarUrl =
+      TEST_MODE || !dataUri
+        ? author.avatar.replace(/&/g, "&amp;")
+        : await dataUrl(author.avatar);
 
     innerSvg +=
       `  <a xlink:href="https://github.com/${author.login}" target="_blank" rel="nofollow" id="${author.login}">\n` +
