@@ -46,12 +46,16 @@ module.exports = async (req, res) => {
     data = await dataRes.json();
   }
 
-  let innerSvg = "";
   let row = 0;
   let totalRows = 1;
+
   let x = 0;
   let y = 0;
+
+  let innerSvg = "";
+  
   data.sort((a, b) => b.total - a.total);
+
   for (let contrib of data) {
     const author = contrib.author;
     if (SKIP.includes(author.login)) continue;
@@ -70,7 +74,14 @@ module.exports = async (req, res) => {
       `    <image x="${x}" y="${y}" clip-path="url(#cp-${author.login})" width="${IMG_W}" height="${IMG_H}" xlink:href="${avatarUrl}" />  \n` +
       `    <title>${author.login} (${contrib.total})</title>\n` +
       `  </a>\n`;
+
     x += IMG_W + MARGIN_X;
+
+    if (x > MAX_WIDTH) {
+      x = 0;
+      y += IMG_H + MARGIN_Y;
+      totalRows++;
+    }
   }
 
   const width = x - MARGIN_X;
