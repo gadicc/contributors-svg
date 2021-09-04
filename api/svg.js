@@ -43,7 +43,7 @@ module.exports = async (req, res) => {
       : req.query.size
     : 60;
 
-  const RADIUS = SIZE / 2;
+  const RADIUS = Math.round(SIZE / 2);
   const IMG_W = RADIUS * 2;
   const IMG_H = RADIUS * 2;
   const MARGIN = 10;
@@ -54,6 +54,8 @@ module.exports = async (req, res) => {
 
   let x = 0;
   let y = 0;
+
+  let maxX = x;
 
   let innerSvg = "";
   data.sort((a, b) => b.total - a.total);
@@ -84,9 +86,11 @@ module.exports = async (req, res) => {
       x = 0;
       y += IMG_H + MARGIN_Y;
     }
+
+    if (x > maxX) maxX = x;
   }
 
-  const width = MAX_WIDTH + MARGIN_X * 2;
+  const width = maxX + IMG_W;
   const height = y;
 
   let svg =
