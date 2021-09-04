@@ -2,16 +2,6 @@ const fetch = require("node-fetch");
 
 const TEST_MODE = !!process.env.TEST_MODE;
 
-// By default GitHub contrib graph gives avatars with s=60
-const RADIUS = 30;
-const IMG_W = RADIUS * 2;
-const IMG_H = RADIUS * 2;
-const MARGIN = 10;
-const MARGIN_X = MARGIN;
-const MARGIN_Y = MARGIN;
-
-const MAX_WIDTH = 890;
-
 const SKIP = ["semantic-release-bot", "renovate-bot"];
 
 async function dataUrl(url) {
@@ -46,14 +36,28 @@ module.exports = async (req, res) => {
     data = await dataRes.json();
   }
 
-  let row = 0;
-  let totalRows = 1;
+  // By default GitHub contrib graph gives avatars with s=60
+  const SIZE = req.query.size
+    ? req.query.size > 460
+      ? 460
+      : req.query.size
+    : 60;
+
+  const RADIUS = Math.round(SIZE / 2);
+  const IMG_W = RADIUS * 2;
+  const IMG_H = RADIUS * 2;
+  const MARGIN = 10;
+  const MARGIN_X = MARGIN;
+  const MARGIN_Y = MARGIN;
+  const MAX_COLS = 10;
+  const MAX_WIDTH = IMG_W * MAX_COLS;
 
   let x = 0;
   let y = 0;
 
+  let maxX = x;
+
   let innerSvg = "";
-  
   data.sort((a, b) => b.total - a.total);
 
   for (let contrib of data) {
@@ -61,10 +65,11 @@ module.exports = async (req, res) => {
     if (SKIP.includes(author.login)) continue;
 
     // https://avatars.githubusercontent.com/u/381978?s=60&amp;v=4
+    const parsedAvatarUrl = author.avatar
+      .replace(/&/g, "&amp;")
+      .replace(/\?s=\d+/, `?s=${SIZE}`);
     const avatarUrl =
-      TEST_MODE || !dataUri
-        ? author.avatar.replace(/&/g, "&amp;")
-        : await dataUrl(author.avatar);
+      TEST_MODE || !dataUri ? parsedAvatarUrl : await dataUrl(parsedAvatarUrl);
 
     innerSvg +=
       `  <a xlink:href="https://github.com/${author.login}" target="_blank" rel="nofollow" id="${author.login}">\n` +
@@ -80,12 +85,13 @@ module.exports = async (req, res) => {
     if (x > MAX_WIDTH) {
       x = 0;
       y += IMG_H + MARGIN_Y;
-      totalRows++;
     }
+
+    if (x > maxX) maxX = x;
   }
 
-  const width = x - MARGIN_X;
-  const height = totalRows * (IMG_H + MARGIN_Y) - MARGIN_Y;
+  const width = maxX + IMG_W;
+  const height = y;
 
   let svg =
     "<svg\n" +
