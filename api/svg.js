@@ -18,16 +18,6 @@ async function dataUrl(url) {
 }
 
 module.exports = async (req, res) => {
-  // By default GitHub contrib graph gives avatars with s=60
-  const RADIUS = req.query.size ? req.query.size / 2 : 30;
-  const IMG_W = RADIUS * 2;
-  const IMG_H = RADIUS * 2;
-  const MARGIN = 10;
-  const MARGIN_X = MARGIN;
-  const MARGIN_Y = MARGIN;
-
-  const MAX_WIDTH = 890;
-
   const user = req.query.user;
   const repo = req.query.repo;
   const dataUri = req.query.dataUri === "false" ? false : true;
@@ -46,7 +36,22 @@ module.exports = async (req, res) => {
     data = await dataRes.json();
   }
 
-  let row = 0;
+  // By default GitHub contrib graph gives avatars with s=60
+  const SIZE = req.query.size
+    ? req.query.size > 460
+      ? 460
+      : req.query.size
+    : 60;
+
+  const RADIUS = SIZE / 2;
+  const IMG_W = RADIUS * 2;
+  const IMG_H = RADIUS * 2;
+  const MARGIN = 10;
+  const MARGIN_X = MARGIN;
+  const MARGIN_Y = MARGIN;
+  const MAX_COLS = 10;
+  const MAX_WIDTH = IMG_W * MAX_COLS;
+
   let totalRows = 1;
 
   let x = 0;
@@ -84,8 +89,8 @@ module.exports = async (req, res) => {
     }
   }
 
-  const width = x - MARGIN_X;
-  const height = totalRows * (IMG_H + MARGIN_Y) - MARGIN_Y;
+  const width = MAX_WIDTH + MARGIN_X * 2;
+  const height = y;
 
   let svg =
     "<svg\n" +
