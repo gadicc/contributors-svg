@@ -66,10 +66,11 @@ module.exports = async (req, res) => {
     if (SKIP.includes(author.login)) continue;
 
     // https://avatars.githubusercontent.com/u/381978?s=60&amp;v=4
+    const parsedAvatarUrl = author.avatar
+      .replace(/&/g, "&amp;")
+      .replace(/\?s=\d+/, `?s=${SIZE}`);
     const avatarUrl =
-      TEST_MODE || !dataUri
-        ? author.avatar.replace(/&/g, "&amp;")
-        : await dataUrl(author.avatar);
+      TEST_MODE || !dataUri ? parsedAvatarUrl : await dataUrl(parsedAvatarUrl);
 
     innerSvg +=
       `  <a xlink:href="https://github.com/${author.login}" target="_blank" rel="nofollow" id="${author.login}">\n` +
