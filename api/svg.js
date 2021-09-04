@@ -2,16 +2,6 @@ const fetch = require("node-fetch");
 
 const TEST_MODE = !!process.env.TEST_MODE;
 
-// By default GitHub contrib graph gives avatars with s=60
-const RADIUS = 30;
-const IMG_W = RADIUS * 2;
-const IMG_H = RADIUS * 2;
-const MARGIN = 10;
-const MARGIN_X = MARGIN;
-const MARGIN_Y = MARGIN;
-
-const MAX_WIDTH = 890;
-
 const SKIP = ["semantic-release-bot", "renovate-bot"];
 
 async function dataUrl(url) {
@@ -28,6 +18,16 @@ async function dataUrl(url) {
 }
 
 module.exports = async (req, res) => {
+  // By default GitHub contrib graph gives avatars with s=60
+  const RADIUS = req.query.size ? req.query.size / 2 : 30;
+  const IMG_W = RADIUS * 2;
+  const IMG_H = RADIUS * 2;
+  const MARGIN = 10;
+  const MARGIN_X = MARGIN;
+  const MARGIN_Y = MARGIN;
+
+  const MAX_WIDTH = 890;
+
   const user = req.query.user;
   const repo = req.query.repo;
   const dataUri = req.query.dataUri === "false" ? false : true;
@@ -53,7 +53,7 @@ module.exports = async (req, res) => {
   let y = 0;
 
   let innerSvg = "";
-  
+
   data.sort((a, b) => b.total - a.total);
 
   for (let contrib of data) {
