@@ -52,13 +52,10 @@ module.exports = async (req, res) => {
   const MAX_COLS = 10;
   const MAX_WIDTH = IMG_W * MAX_COLS;
 
-  let totalRows = 1;
-
   let x = 0;
   let y = 0;
 
   let innerSvg = "";
-
   data.sort((a, b) => b.total - a.total);
 
   for (let contrib of data) {
@@ -86,7 +83,6 @@ module.exports = async (req, res) => {
     if (x > MAX_WIDTH) {
       x = 0;
       y += IMG_H + MARGIN_Y;
-      totalRows++;
     }
   }
 
